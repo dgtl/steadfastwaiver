@@ -349,7 +349,7 @@ html, body {
     <path d="M48 14 L44 18 L48 22" stroke="#1A73E8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   <h2>Please Rotate Your Device</h2>
-  <p>This form requires landscape orientation on phones.</p>
+  <p>Landscape orientation is required to sign the waiver.</p>
 </div>
 
 <div id="confirmOverlay">
@@ -432,7 +432,7 @@ html, body {
     
     <div class="sig-canvas-wrap" id="sigWrap">
       <canvas id="sigCanvas" height="160"></canvas>
-      <div class="sig-placeholder">Sign here with your finger or stylus</div>
+      <div class="sig-placeholder">Tap here to sign</div>
     </div>
     <div class="sig-actions">
       <button type="button" onclick="clearSignature()">Clear</button>
@@ -497,6 +497,9 @@ function detectDevice(){
 
 function checkOrientation(){
   if(!state.isPhone){ document.getElementById('orientationOverlay').style.display='none'; return; }
+  // Only require landscape when signature section is unlocked (all sections acknowledged)
+  const allAcked = sections.every(s=>state.acknowledged[s.id]);
+  if(!allAcked){ document.getElementById('orientationOverlay').style.display='none'; return; }
   const isLandscape = window.innerWidth > window.innerHeight;
   document.getElementById('orientationOverlay').style.display = isLandscape ? 'none' : 'flex';
 }
@@ -555,6 +558,7 @@ function updateProgress(){
   const sigSection = document.getElementById('signatureSection');
   if(done === total){
     sigSection.classList.remove('locked');
+    checkOrientation(); // trigger landscape prompt on phones now that signing is needed
     sigSection.scrollIntoView({behavior:'smooth', block:'center'});
   } else { sigSection.classList.add('locked'); }
   validateSubmit();
